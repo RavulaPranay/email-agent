@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Email Agent — AI Powered</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --card: #1a1a26;
+    --border: #2a2a3d;
+    --accent: #7c6fff;
+    --accent2: #ff6fb0;
+    --text: #f0f0f8;
+    --muted: #7070a0;
+    --success: #4fffb0;
+  }
+
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,111,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,111,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .blob1, .blob2 {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+    animation: float 8s ease-in-out infinite alternate;
+  }
+  .blob1 { width: 400px; height: 400px; background: rgba(124,111,255,0.12); top: -100px; left: -100px; }
+  .blob2 { width: 300px; height: 300px; background: rgba(255,111,176,0.08); bottom: -80px; right: -80px; animation-delay: -4s; }
+
+  @keyframes float { from { transform: translate(0,0); } to { transform: translate(20px, 30px); } }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(124,111,255,0.12);
+    border: 1px solid rgba(124,111,255,0.3);
+    color: var(--accent);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.8rem;
+    border-radius: 100px;
+    margin-bottom: 1.2rem;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease infinite;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.8)} }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.8rem;
+  }
+
+  h1 span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    animation: fadeUp 0.6s ease 0.1s both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  }
+
+  label {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .input-group { margin-bottom: 1.2rem; }
+
+  input[type="text"], input[type="email"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,111,255,0.1);
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    padding: 0.75rem 1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.6;
+  }
+
+  textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(124,111,255,0.1);
+  }
+
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+  .tone-group {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tone-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    padding: 0.35rem 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .tone-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .tone-btn.active {
+    background: rgba(124,111,255,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .send-btn {
+    width: 100%;
+    margin-top: 1.5rem;
+    padding: 0.9rem;
+    background: linear-gradient(135deg, var(--accent), #9c6fff);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .send-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 30px rgba(124,111,255,0.35);
+  }
+
+  .send-btn:active:not(:disabled) { transform: translateY(0); }
+  .send-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .loader {
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+  .loader.show { display: flex; }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #fff;
+    animation: bounce 1.2s ease infinite;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100%{transform:scale(0.8);opacity:0.5} 40%{transform:scale(1.2);opacity:1} }
+
+  .output {
+    margin-top: 1.5rem;
+    display: none;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .output.show { display: block; }
+
+  .output-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.8rem;
+  }
+
+  .output-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--success);
+  }
+
+  .copy-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    padding: 0.3rem 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* FIX: output box uses pre-wrap to preserve line breaks */
+  .output-box {
+    background: var(--surface);
+    border: 1px solid rgba(79,255,176,0.2);
+    border-radius: 10px;
+    padding: 1.2rem;
+    font-size: 0.82rem;
+    line-height: 1.8;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  /* FIX: status box replaces error box — blue/yellow, no red, no scary words */
+  .status-box {
+    background: rgba(124,111,255,0.08);
+    border: 1px solid rgba(124,111,255,0.25);
+    border-radius: 10px;
+    padding: 1rem;
+    font-size: 0.8rem;
+    color: #a0a8ff;
+    margin-top: 1.2rem;
+    display: none;
+  }
+
+  .status-box.show { display: block; }
+
+  .footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.72rem;
+    color: var(--muted);
+    animation: fadeUp 0.6s ease 0.2s both;
+  }
+
+  .footer a { color: var(--accent); text-decoration: none; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1.5rem 0;
+  }
+</style>
+</head>
+<body>
+
+<div class="blob1"></div>
+<div class="blob2"></div>
+
+<div class="container">
+
+  <div class="header">
+    <div class="badge">AI Powered</div>
+    <h1>Email <span>Agent</span></h1>
+    <p class="subtitle">Describe what you need — the AI drafts and sends it for you.</p>
+  </div>
+
+  <div class="card">
+
+    <div class="row">
+      <div class="input-group">
+        <label>To (email address)</label>
+        <input type="email" id="toEmail" placeholder="recipient@gmail.com"/>
+      </div>
+      <div class="input-group">
+        <label>Your name</label>
+        <input type="text" id="senderName" placeholder="Pranay"/>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <label>What should the email say?</label>
+      <textarea id="messageInput" placeholder="e.g. Draft a professional email thanking my manager for the promotion opportunity..."></textarea>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="input-group">
+      <label>Tone</label>
+      <div class="tone-group">
+        <button class="tone-btn active" onclick="selectTone(this, 'professional')">Professional</button>
+        <button class="tone-btn" onclick="selectTone(this, 'friendly')">Friendly</button>
+        <button class="tone-btn" onclick="selectTone(this, 'formal')">Formal</button>
+        <button class="tone-btn" onclick="selectTone(this, 'casual')">Casual</button>
+        <button class="tone-btn" onclick="selectTone(this, 'concise')">Concise</button>
+      </div>
+    </div>
+
+    <button class="send-btn" id="sendBtn" onclick="sendEmail()">
+      <span id="btnText">Generate & Send Email →</span>
+      <div class="loader" id="loader">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <span style="font-size:0.8rem;margin-left:4px">AI is writing...</span>
+      </div>
+    </button>
+
+    <div class="output" id="output">
+      <div class="output-header">
+        <span class="output-label">✓ Email drafted &amp; sent</span>
+        <button class="copy-btn" onclick="copyText()">Copy</button>
+      </div>
+      <div class="output-box" id="outputText"></div>
+    </div>
+
+    <div class="status-box" id="statusBox"></div>
+
+  </div>
+
+  <div class="footer">
+    Built with n8n · Groq · Gmail &nbsp;·&nbsp; <a href="#">View on Portfolio</a>
+  </div>
+
+</div>
+
+<script>
+  const WEBHOOK_URL = "https://workflow-automation.app.n8n.cloud/webhook/68c3b13c-7cf3-4902-9bbb-cf4978106be9";
+
+  let selectedTone = "professional";
+
+  function selectTone(el, tone) {
+    document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    selectedTone = tone;
+  }
+
+  async function sendEmail() {
+    const to = document.getElementById('toEmail').value.trim();
+    const name = document.getElementById('senderName').value.trim();
+    const message = document.getElementById('messageInput').value.trim();
+
+    // Reset UI
+    document.getElementById('output').classList.remove('show');
+    document.getElementById('statusBox').classList.remove('show');
+
+    if (!message) {
+      showStatus("Please describe what the email should say.");
+      return;
+    }
+
+    if (!to) {
+      showStatus("Please enter the recipient's email address.");
+      return;
+    }
+
+    // Build prompt — includes all info so AI can draft AND send
+    const fullPrompt = `Write a ${selectedTone} email and send it. Sender name: ${name || 'the sender'}. Recipient email: ${to}. Task: ${message}`;
+
+    setLoading(true);
+
+    try {
+      const res = await fetch(WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: fullPrompt, to: to })
+      });
+
+      // FIX: read response as text first
+      const rawText = await res.text();
+
+      if (!rawText || rawText.trim() === '') {
+        showStatus("The agent is taking longer than usual. Check your Gmail inbox — the email may have been sent.");
+        setLoading(false);
+        return;
+      }
+
+      // FIX: try to parse JSON, otherwise use raw text
+      let emailBody = rawText;
+      try {
+        const json = JSON.parse(rawText);
+        // extract output field if present
+        emailBody = json.output || json.body || json.text || json.message || rawText;
+      } catch(e) {
+        // not JSON — use raw text directly
+        emailBody = rawText;
+      }
+
+      // FIX: preserve line breaks — replace \n with actual newlines if escaped
+      emailBody = emailBody.replace(/\\n/g, '\n');
+
+      // Display the email in the output box
+      // Render HTML tags properly instead of showing them as raw text
+      document.getElementById('outputText').innerHTML = emailBody;
+      document.getElementById('output').classList.add('show');
+
+    } catch (err) {
+      showStatus("The agent is not reachable right now. Check that your n8n workflow is published and active.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function setLoading(on) {
+    const btn = document.getElementById('sendBtn');
+    const txt = document.getElementById('btnText');
+    const loader = document.getElementById('loader');
+    btn.disabled = on;
+    txt.style.display = on ? 'none' : 'inline';
+    loader.classList.toggle('show', on);
+  }
+
+  // FIX: renamed from showError to showStatus, blue color, no scary words
+  function showStatus(msg) {
+    const el = document.getElementById('statusBox');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function copyText() {
+    const text = document.getElementById('outputText').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 2000);
+    });
+  }
+</script>
+</body>
+</html>
